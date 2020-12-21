@@ -18,6 +18,32 @@ class VixenClient(object):
             self.logger.info('Configuration loaded')
             #print(self.config)
 
+    ### Configures list of where to slice incoming sACN data
+    ### based on the config file
+    def setupParser(self):
+        self.idxArray = []
+        i = 0
+        for ch in self.config['channels']:
+            if(ch['isRGB']):
+                print('Adding RGB channel indexes')
+                self.idxArray.append(
+                        dict(
+                            start=ch['startIndex'],
+                            end=(ch['pixelCount']*3+ch['startIndex'])
+                        ) 
+                )
+            else:
+                print('Adding single channel indexes')
+                self.idxArray.append(
+                    dict(
+                        start=ch['startIndex'],
+                        end=ch['pixelCount']+ch['startIndex']
+                    )
+                )
+            i = i+1
+        print(self.idxArray)
+
+    ### Start receiving sACN data and control lights
     def begin(self):
         # start the sacn receiver
         self.receiver.start()
@@ -28,8 +54,12 @@ class VixenClient(object):
         # set sacn client to use multicast
         self.receiver.join_multicast(self.config['universe'])
 
+    ### Callback handler to parse sACN data and send to lights
     def parseData(self, packet):
-        print(packet.dmxData)
+        for ch in self.idxArray:
+            p=packet.dmxData[ch['start']:ch['end']]
+            print(p)
+        #print(packet.dmxData)
 
 
 
@@ -73,4 +103,5 @@ if __name__ == '__main__':
 
     client = VixenClient()
     client.loadConfig()
+    client.setupParser()
     client.begin()
