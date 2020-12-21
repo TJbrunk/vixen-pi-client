@@ -1,0 +1,18 @@
+{
+    "universe": 1,
+    "channels": [
+	{
+          "name": "RoofLine",
+	  "pixelCount": 10,
+	  "pin": "D18",
+	  "isRGB": true
+        },
+	{
+	  "name": "Tree",
+	  "pixelCount": 1,
+	  "pin": "D19",
+	  "isRGB": false
+	}
+    ]
+}
+
