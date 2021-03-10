@@ -1,6 +1,7 @@
 import sys, os, sacn, time, json
 import logging, logging.handlers
 
+from channel import Channel, RgbChannel
 
 class VixenClient(object):
 
@@ -25,7 +26,6 @@ class VixenClient(object):
         i = 0
         for ch in self.config['channels']:
             if(ch['isRGB']):
-                print('Adding RGB channel indexes')
                 self.idxArray.append(
                         dict(
                             start=ch['startIndex'],
@@ -33,7 +33,6 @@ class VixenClient(object):
                         ) 
                 )
             else:
-                print('Adding single channel indexes')
                 self.idxArray.append(
                     dict(
                         start=ch['startIndex'],
@@ -41,7 +40,17 @@ class VixenClient(object):
                     )
                 )
             i = i+1
-        print(self.idxArray)
+
+    ### Create the 'channel' objects that are responsible for sending sACN data to hardware
+    def initChannels(self):
+        self.channels = []
+        for ch in self.config['channels']:
+            self.logger.info('Preparing channel init {}'.format(ch))
+            if(ch.get('isRGB')):
+                self.channels.append(RgbChannel(ch))
+            else:
+                self.channels.append(Channel(ch))
+
 
     ### Start receiving sACN data and control lights
     def begin(self):
@@ -103,5 +112,6 @@ if __name__ == '__main__':
 
     client = VixenClient()
     client.loadConfig()
+    client.initChannels()
     client.setupParser()
     client.begin()
