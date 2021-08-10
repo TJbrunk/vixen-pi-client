@@ -21,10 +21,10 @@ class Config():
       config = json.load(c)
       self.logger.info('Configuration loaded')
       self.universe = config['universe']
-      print('Universe: ', self.universe)
+      self.logger.debug('Universe: %s', self.universe)
       self.channels = config['channels']
-      # if(config['windowsIPAddress']):
-      self.windowsIPAddress = config['windowsIPAddress']
-      print('Windows IPAddress: ', self.windowsIPAddress)
-      # else:
-        # self.windowsIPAddress = None
+      if(config['windowsIPAddress']):
+        self.windowsIPAddress = config['windowsIPAddress']
+        self.logger.debug('Windows IPAddress: %s', self.windowsIPAddress)
+      else:
+        self.windowsIPAddress = None

@@ -15,5 +15,5 @@ Designed to work with standard lights via electrical relay control, or 'smart' n
   - rpi_ws281x
   - Adafruit Neopixel
   - [sacn](https://github.com/Hundemeier/sacn)
-*pip packages need to be installed as sudo because the app needs to access hardware*
+*pip packages need to be installed as sudo because the app needs to access hardware*  
 ``` sudo pip install RPI.GPIO rpi_ws281x adafruit-circuitpython-neopixel sacn ```

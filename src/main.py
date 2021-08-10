@@ -79,10 +79,10 @@ class VixenClient(object):
 
 
 if __name__ == '__main__':
-  logFile = './logs/debug.log'
+  logFile = '../logs/debug.log'
 
-  if not os.path.exists('./logs'):
-    os.makedirs('./logs')
+  if not os.path.exists('../logs'):
+    os.makedirs('../logs')
     with open(logFile, 'a'): pass
 
   # Create a rotation handler to rotate logging between 20 files
