@@ -1,30 +1,30 @@
-import sys, os, sacn, time, json
+import sys, os, sacn, time
 import logging, logging.handlers
 
 from channel import Channel, RgbChannel
+from config import Config
 
 class VixenClient(object):
 
   def __init__(self):
     self.logger = logging.getLogger('VixenClient')
-    self.receiver = sacn.sACNreceiver()
+    self.config: Config
 
-  def loadConfig(self):
-    configFile = os.path.join('config.local.json')
-    if(not os.path.exists(configFile)):
-      self.logger.warning('Local config file not found. Using defaults')
-      configFile = os.path.join('config.json')
-    with open(configFile) as c:
-      self.config = json.load(c)
-      self.logger.info('Configuration loaded')
-      #print(self.config)
+
+  def configure(self, config: Config):
+    config.load()
+    if(sys.platform == 'win32'):
+      self.receiver = sacn.sACNreceiver(bind_address=config.windowsIPAddress)
+    else:
+      self.receiver = sacn.sACNreceiver()
+
 
   ### Configures list of where to slice incoming sACN data
   ### based on the config file
-  def setupParser(self):
+  def setupParser(self, config: Config):
     self.idxArray = []
     i = 0
-    for ch in self.config['channels']:
+    for ch in config.channels:
       if(ch['isRGB']):
         self.idxArray.append(
           dict(
@@ -43,9 +43,9 @@ class VixenClient(object):
         i = i+1
 
   ### Create the 'channel' objects that are responsible for sending sACN data to hardware
-  def initChannels(self):
+  def initChannels(self, config: Config):
     self.channels = []
-    for ch in self.config['channels']:
+    for ch in config.channels:
       self.logger.info('Preparing channel init {}'.format(ch))
       if(ch.get('isRGB')):
         self.channels.append(RgbChannel(ch))
@@ -54,7 +54,7 @@ class VixenClient(object):
 
 
   ### Start receiving sACN data and control lights
-  def begin(self):
+  def begin(self, config: Config):
     # start the sacn receiver
     self.logger.info("Starting sACN data receiver")
     self.receiver.start()
@@ -62,9 +62,13 @@ class VixenClient(object):
     # register the callback to handle incoming sacn data
     self.receiver.register_listener('universe',
         self.parseData,
-        universe = self.config['universe'])
+        universe = config.universe)
+
     # set sacn client to use multicast
-    self.receiver.join_multicast(self.config['universe'])
+    if(sys.platform == 'win32'):
+      self.logger.warning('Unable to join mulicast on Windows')
+    else:
+      self.receiver.join_multicast(config.universe)
 
   ### Callback handler to parse sACN data and send to lights
   def parseData(self, packet):
@@ -112,8 +116,9 @@ if __name__ == '__main__':
 
   logging.info('Application started')
 
+  configuration = Config()
   client = VixenClient()
-  client.loadConfig()
-  client.initChannels()
-  client.setupParser()
-  client.begin()
+  client.configure(configuration)
+  client.initChannels(configuration)
+  client.setupParser(configuration)
+  client.begin(configuration)
