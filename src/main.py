@@ -1,6 +1,7 @@
-import sys, os, sacn, time
-import logging, logging.handlers
+import sys, os, sacn, json
+import logging, logging.config
 
+from typing import List
 from channel import Channel, RgbChannel
 from config import Config
 
@@ -9,8 +10,12 @@ class VixenClient(object):
   def __init__(self):
     self.logger = logging.getLogger('VixenClient')
     self.config: Config
+    self.channels: List[Channel]
 
 
+  '''
+  Load configuration and start sACN receiver
+  '''
   def configure(self, config: Config):
     config.load()
     if(sys.platform == 'win32'):
@@ -19,8 +24,10 @@ class VixenClient(object):
       self.receiver = sacn.sACNreceiver()
 
 
-  ### Configures list of where to slice incoming sACN data
-  ### based on the config file
+  '''
+  Create list to know where to slice incominng sACN data
+  based off of the loaded configuration file
+  '''
   def setupParser(self, config: Config):
     self.idxArray = []
     for ch in config.channels:
@@ -40,7 +47,10 @@ class VixenClient(object):
           )
         )
 
-  ### Create the 'channel' objects that are responsible for sending sACN data to hardware
+  '''
+  Create the 'channel' objects that are responsible for sending
+  sACN data to hardware
+  '''
   def initChannels(self, config: Config):
     self.channels = []
     for ch in config.channels:
@@ -51,7 +61,9 @@ class VixenClient(object):
         self.channels.append(Channel(ch))
 
 
-  ### Start receiving sACN data and control lights
+  '''
+  Start receiving sACN data and control lights
+  '''
   def begin(self, config: Config):
     # start the sacn receiver
     self.logger.info("Starting sACN data receiver")
@@ -68,16 +80,18 @@ class VixenClient(object):
     else:
       self.receiver.join_multicast(config.universe)
 
-  ### Callback handler to parse sACN data and send to lights
+  '''
+  Callback handler to parse sACN data and send to lights
+  '''
   def parseData(self, packet):
-    self.logger.debug('New Packet. Source: %s Universe: %d Sequence: %d',
-                    packet.sourceName, packet.universe, packet.sequence)
+    self.logger.info('New Packet. Universe: %d Sequence: %d',
+                    packet.universe, packet.sequence)
     # self.logger.debug('Full Packet: %s', packet.dmxData)
 
-    #TODO: send dmxData to correct channel for IO control
-    for ch in self.idxArray:
+    for idx, ch in enumerate(self.idxArray):
       p = packet.dmxData[ch['start']:ch['end']]
-      self.logger.info('Ch data %d', p)
+      # self.logger.info('Ch data %d', p)
+      self.channels[idx].update(p)
 
 
 
@@ -88,34 +102,14 @@ if __name__ == '__main__':
     os.makedirs('../logs')
     with open(logFile, 'a'): pass
 
-  # Create a rotation handler to rotate logging between 20 files
-  handler = logging.handlers.RotatingFileHandler(
-              logFile, maxBytes=2000000, backupCount=20)
+  with open(os.path.join('logging.json'),'rt') as f:
+        config=json.load(f)
+        f.close()
+        logging.config.dictConfig(config)
 
-  # format the message logging
-  formatter = logging.Formatter('%(asctime)s %(name)-8s %(levelname)-8s %(message)s')
-  # register the formatter
-  handler.setFormatter(formatter)
+  logger=logging.getLogger(__name__)
 
-  rootLogger = logging.getLogger()
-  # set the log level
-  rootLogger.setLevel(logging.DEBUG)
-  # register the rotation handler with the logger
-  rootLogger.addHandler(handler)
-
-  # define a Handler to write INFO messages to sys.stderr
-  console = logging.StreamHandler()
-  console.setLevel(logging.INFO)
-
-
-  # set a different format for console messages
-  formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
-
-  # tell the handler to use the simple format
-  console.setFormatter(formatter)
-
-  # add the handler to the root logger
-  rootLogger.addHandler(console)
+  rootLogger = logging.getLogger(__name__)
 
   logging.info('Application started')
 

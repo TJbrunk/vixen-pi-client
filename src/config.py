@@ -5,7 +5,7 @@ from typing import List
 class Config():
 
   def __init__(self):
-    self.logger = logging.getLogger('Config')
+    self.logger = logging.getLogger(__name__)
     self.windowsIPAddress: str
     self.channels: List[Channel]
     self.universe: int
