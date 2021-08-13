@@ -5,6 +5,7 @@ from sys import platform
 if platform != "win32":
   import RPi.GPIO as GPIO
   import board, neopixel
+  from adafruit_blinka.microcontroller.bcm283x import pin
 
 import logging, sys
 
@@ -41,7 +42,7 @@ class RgbChannel(Channel):
     if(sys.platform == 'win32'):
       self.logger.info('WINDOWS: simulating setting up NeoPixel')
     else:
-      self.pixels = neopixel.NeoPixel(self.pin, config.get('pixelCount'))
+      self.pixels = neopixel.NeoPixel(pin.Pin(self.pin), config.get('pixelCount'))
       # init rgb values to 0
       for p in self.pixels:
         p = (0, 0, 0)

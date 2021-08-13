@@ -6,14 +6,14 @@
         "name": "RoofLine",
         "pixelCount": 10,
         "startIndex": 0,
-        "pin": "18",
+        "pin": 18,
         "isRGB": true
         },
         {
         "name": "Tree",
         "pixelCount": 1,
         "startIndex": 30,
-        "pin": "19",
+        "pin": 19,
         "isRGB": false
     }
     ]
