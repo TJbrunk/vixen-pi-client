@@ -23,7 +23,6 @@ class VixenClient(object):
   ### based on the config file
   def setupParser(self, config: Config):
     self.idxArray = []
-    i = 0
     for ch in config.channels:
       if(ch['isRGB']):
         self.idxArray.append(
@@ -40,7 +39,6 @@ class VixenClient(object):
             end=ch['pixelCount']+ch['startIndex']
           )
         )
-        i = i+1
 
   ### Create the 'channel' objects that are responsible for sending sACN data to hardware
   def initChannels(self, config: Config):
@@ -72,10 +70,15 @@ class VixenClient(object):
 
   ### Callback handler to parse sACN data and send to lights
   def parseData(self, packet):
+    self.logger.debug('New Packet. Source: %s Universe: %d Sequence: %d',
+                    packet.sourceName, packet.universe, packet.sequence)
+    # self.logger.debug('Full Packet: %s', packet.dmxData)
+
+    #TODO: send dmxData to correct channel for IO control
     for ch in self.idxArray:
-      p=packet.dmxData[ch['start']:ch['end']]
-      print(p)
-    print(packet.dmxData)
+      p = packet.dmxData[ch['start']:ch['end']]
+      self.logger.info('Ch data %d', p)
+
 
 
 if __name__ == '__main__':
