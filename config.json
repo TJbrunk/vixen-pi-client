@@ -3,18 +3,19 @@
     "universe": 1,
     "channels": [
         {
-        "name": "RoofLine",
-        "startIndex": 0,
-        "pin": 18,
-        "isRGB": true
+            "name": "RoofLine",
+            "startIndex": 0,
+            "pin": 18,
+            "isRGB": false,
+            "pixelCount": 1
         },
         {
-        "name": "Tree",
-        "startIndex": 30,
-        "pin": 19,
-        "isRGB": false,
-        "pixelCount": 1
-    }
+            "name": "PixelStrand",
+            "startIndex": 1,
+            "pin": 18,
+            "isRGB": true,
+            "pixelCount": 20
+        }
     ]
 }
 

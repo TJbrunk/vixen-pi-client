@@ -56,6 +56,16 @@ class RgbChannel(Channel):
       for p in self.pixels:
         p = (0, 0, 0)
 
+  def split_colors(self, sacnData):
+    arrs = []
+    size = 3
+    while len(sacnData) > size:
+      pice = sacnData[:size]
+      arrs.append(pice)
+      sacnData = sacnData[size:]
+    arrs.append(sacnData)
+    return arrs
+
   '''
   Update strand of NeoPixels to commanded color
   '''
@@ -64,5 +74,6 @@ class RgbChannel(Channel):
     if(sys.platform == 'win32'):
       self.logger.info('WINDOWS: simulating update')
     else:
-      for n in range(sacnData, 3):
-        self.pixels = n
+      for i, color in enumerate(self.split_colors(sacnData)):
+        self.logger.debug("Setting Pixel %d to %s", i, color)
+        self.pixels[i] = color
