@@ -74,11 +74,19 @@ class VixenClient(object):
         self.parseData,
         universe = config.universe)
 
+    self.receiver.register_listener('availability',
+        self.availability_changed)
+
     # set sacn client to use multicast
     if(sys.platform == 'win32'):
       self.logger.warning('Unable to join mulicast on Windows')
     else:
       self.receiver.join_multicast(config.universe)
+
+  def availability_changed(self, universe: int, changed: str):
+    self.logger.info("Availability changed event " + changed)
+    if(changed == 'timeout'):
+      self.begin()
 
   '''
   Callback handler to parse sACN data and send to lights

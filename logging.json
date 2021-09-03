@@ -24,7 +24,14 @@
       }
    },
    "loggers": {
-      "config": {
+      "VixenClient": {
+         "level": "DEBUG",
+         "handler": [
+            "console",
+            "file"
+         ],
+         "propagate": "yes"
+      },"config": {
          "level": "DEBUG",
          "handler": [
             "console",
