@@ -1,0 +1,3 @@
+[submodule "src/kadmium-sacn"]
+	path = src/kadmium-sacn
+	url = https://github.com/iKadmium/kadmium-sacn.git
