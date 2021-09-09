@@ -6,14 +6,14 @@ using Microsoft.Extensions.Configuration;
 namespace VixenClient {
     internal class Program {
 
-        static async Task Main(string[] args) {
+        internal static async Task Main(string[] args) {
             using var host = CreateHostBuilder(args)
                 .Build();
 
             await host.RunAsync();
         }
 
-        static IHostBuilder CreateHostBuilder(string[] args) =>
+        internal static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
             .ConfigureServices(sc => {
                 sc.AddSingleton(sc => {
